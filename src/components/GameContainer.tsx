@@ -1,20 +1,21 @@
-import React, { useEffect, useReducer, useRef } from "react";
+import React, { useState, useEffect, useReducer, useRef } from "react";
 import useOneFrame from "./useOneFrame";
 import useKeyInput from "./useKeyInput";
 
 export const GameContainer = props => {
+  const [keys, setKeys] = useState([]);
   const canvasRef = useRef(null);
 
-  const update = positions => {
+  const updatePositions = positions => {
     const objPos = { positions: positions };
     const newGameState = props.rustFuncs.update_game_state(objPos);
     return newGameState;
   };
 
-  const reducer = (state, action) => {
+  const positionsReducer = (state, action) => {
     switch (action.type) {
       case "update":
-        const positions = update(state.positions);
+        const positions = updatePositions(state.positions);
         return positions;
       default:
         throw new Error();
@@ -29,11 +30,12 @@ export const GameContainer = props => {
     });
   };
 
-  const [positions, dispatchPositions] = useReducer(reducer, {
+  const [positions, dispatchPositions] = useReducer(positionsReducer, {
     positions: [[5, 5], [200, 195], [350, 100]]
   });
+
   useEffect(drawCanvas);
-  useKeyInput();
+  useKeyInput(keys, setKeys);
   useOneFrame(() => dispatchPositions({ type: "update" }));
 
   return (
