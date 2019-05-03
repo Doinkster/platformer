@@ -3,67 +3,74 @@ import useOneFrame from "./useOneFrame";
 
 export const GameContainer = props => {
   const [keys, setKeys] = useState([]);
+  //const [positions, setPositions] = useState([[5, 5], [200, 195], [350, 100]]);
+  const keyCodes = useRef([32, 65, 68]);
   const canvasRef = useRef(null);
-  
-  const addToKeys = e => {
+
+  const addToKeys = useRef((e) => {
     const newKeys = keys;
-    const keysToUse = [65, 68, 32];
     if (newKeys.indexOf(e.keyCode) === -1) {
-      if (keysToUse.indexOf(e.keyCode) !== -1) {
+      if (keyCodes.current.indexOf(e.keyCode) !== -1) {
         newKeys.push(e.keyCode);
       }
     }
     setKeys(newKeys);
-  };
+  });
 
-  const removeFromKeys = e => {
+  const removeFromKeys = useRef((e) => {
     const newKeys = keys;
     const index = newKeys.indexOf(e.keyCode);
     if (index !== -1) {
       newKeys.splice(index, 1);
     }
     setKeys(newKeys);
-  };
+  });
 
   useEffect(() => {
-    window.addEventListener("keydown", addToKeys);
-    window.addEventListener("keyup", removeFromKeys);
+    window.addEventListener("keydown", addToKeys.current);
+    window.addEventListener("keyup", removeFromKeys.current);
     return () => {
-      window.removeEventListener("keydown", addToKeys);
-      window.removeEventListener("keyup", removeFromKeys);
+      window.removeEventListener("keydown", addToKeys.current);
+      window.removeEventListener("keyup", removeFromKeys.current);
     };
   }, []);
 
-  const updatePositions = positions => {
-    const objPos = { positions: positions };
-    const newGameState = props.rustFuncs.update_game_state(objPos);
+  const updateGameState = gameState => {
+    // gameState = { 
+    //   positions: positions, 
+    //   keys_pressed: keys 
+    // };
+    console.log("before", gameState)
+    const newGameState = props.rustFuncs.update_game_state(gameState);
+    console.log("after", gameState)
     return newGameState;
   };
 
-  const positionsReducer = (state, action) => {
+  const gameStateReducer = (state, action) => {
     switch (action.type) {
       case "update":
-        const positions = updatePositions(state.positions);
-        return positions;
+        const newGameState = updateGameState(state);
+        return newGameState;
       default:
         throw new Error();
     }
   };
 
-  const [positions, dispatchPositions] = useReducer(positionsReducer, {
-    positions: [[5, 5], [200, 195], [350, 100]]
+  const [gameState, dispatchGameState] = useReducer(gameStateReducer, {
+    positions: [[5, 5], [200, 195], [350, 100]],
+    keys_pressed: keys
   });
 
   const drawCanvas = () => {
     const ctx = canvasRef.current.getContext("2d");
     ctx.clearRect(0, 0, 500, 200);
-    positions.positions.forEach(entityPosition => {
+    gameState.positions.forEach(entityPosition => {
       ctx.fillRect(entityPosition[0], entityPosition[1], 5, 5);
     });
   };
 
   useEffect(drawCanvas);
-  useOneFrame(() => dispatchPositions({ type: "update" }));
+  useOneFrame(() => dispatchGameState({ type: "update" }));
 
   return (
     <canvas ref={canvasRef} width="500" height="200" className="gameCanvas" />

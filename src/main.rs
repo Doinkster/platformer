@@ -23,20 +23,38 @@ use serde_json::{Value};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct GameState {
-    positions: Vec<(i32, i32)>
+    positions: Vec<(i32, i32)>,
+    keys_pressed: Vec<i32>
     // velocities: Vec<(i32, i32)>,
     // height_widths: Vec<(i32, i32)>
 }
 
 impl GameState {
-    fn update_positions(&mut self) -> &Vec<(i32, i32)> {
-        for tuple in &mut self.positions {
-            tuple.0 += 1;
-            tuple.1 += 1;
-        }
+    fn decrease_x() {
+        
+    }
 
+    fn increase_x() {
+        
+    }
+
+    fn update_player(&mut self) {
+        //keys = [32, 65, 68]
+        
+    }
+
+    fn update_positions(&mut self) -> &Vec<(i32, i32)> {
+        // for tuple in &mut self.positions {
+        //     tuple.0 += 1;
+        //     tuple.1 += 1;
+        // }
+        //&self.update_player();
+        //update_npcs();
+        //self.check_collisions();
         &self.positions
     }
+
+    
 }
 
 js_serializable!( GameState );
@@ -48,7 +66,8 @@ fn update_game_state(js_game_state: Reference) -> GameState {
     let js_game_state_deserialized = js!(
         let gameState = @{js_game_state};
         return {
-            positions: gameState.positions
+            positions: gameState.positions,
+            keys_pressed: gameState.keys_pressed
         };
     );
 
