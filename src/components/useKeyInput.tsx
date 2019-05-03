@@ -9,6 +9,7 @@ const useKeyInput = (keys, setKeys) => {
         newKeys.push(e.keyCode);
       }
     }
+    console.log(keys)
     setKeys(newKeys);
   };
 
