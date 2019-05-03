@@ -1,14 +1,38 @@
 import React, { useState, useEffect, useReducer, useRef } from "react";
 import useOneFrame from "./useOneFrame";
-import useKeyInput from "./useKeyInput";
 
 export const GameContainer = props => {
   const [keys, setKeys] = useState([]);
   const canvasRef = useRef(null);
-  //@ts-ignore
-  const [positions, dispatchPositions] = useReducer(positionsReducer, {
-    positions: [[5, 5], [200, 195], [350, 100]]
-  });
+  
+  const addToKeys = e => {
+    const newKeys = keys;
+    const keysToUse = [65, 68, 32];
+    if (newKeys.indexOf(e.keyCode) === -1) {
+      if (keysToUse.indexOf(e.keyCode) !== -1) {
+        newKeys.push(e.keyCode);
+      }
+    }
+    setKeys(newKeys);
+  };
+
+  const removeFromKeys = e => {
+    const newKeys = keys;
+    const index = newKeys.indexOf(e.keyCode);
+    if (index !== -1) {
+      newKeys.splice(index, 1);
+    }
+    setKeys(newKeys);
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", addToKeys);
+    window.addEventListener("keyup", removeFromKeys);
+    return () => {
+      window.removeEventListener("keydown", addToKeys);
+      window.removeEventListener("keyup", removeFromKeys);
+    };
+  }, []);
 
   const updatePositions = positions => {
     const objPos = { positions: positions };
@@ -26,6 +50,10 @@ export const GameContainer = props => {
     }
   };
 
+  const [positions, dispatchPositions] = useReducer(positionsReducer, {
+    positions: [[5, 5], [200, 195], [350, 100]]
+  });
+
   const drawCanvas = () => {
     const ctx = canvasRef.current.getContext("2d");
     ctx.clearRect(0, 0, 500, 200);
@@ -35,7 +63,6 @@ export const GameContainer = props => {
   };
 
   useEffect(drawCanvas);
-  useKeyInput(keys, setKeys);
   useOneFrame(() => dispatchPositions({ type: "update" }));
 
   return (
