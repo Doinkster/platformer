@@ -39,8 +39,10 @@ impl GameState {
     }
 
     fn update_player(&mut self) {
-        //keys = [32, 65, 68]
-        
+        //keys = [32, 65, 68, 87]
+        if self.keys_pressed.contains(&65) {
+            self.positions[0].0 += 1;
+        }
     }
 
     fn update_positions(&mut self) -> &Vec<(i32, i32)> {
@@ -48,7 +50,7 @@ impl GameState {
         //     tuple.0 += 1;
         //     tuple.1 += 1;
         // }
-        //&self.update_player();
+        &self.update_player();
         //update_npcs();
         //self.check_collisions();
         &self.positions
@@ -65,6 +67,7 @@ js_deserializable!( GameState );
 fn update_game_state(js_game_state: Reference) -> GameState {
     let js_game_state_deserialized = js!(
         let gameState = @{js_game_state};
+        console.log("GAMESTATE", gameState);
         return {
             positions: gameState.positions,
             keys_pressed: gameState.keys_pressed

@@ -2,28 +2,28 @@ import React, { useState, useEffect, useReducer, useRef } from "react";
 import useOneFrame from "./useOneFrame";
 
 export const GameContainer = props => {
-  const [keys, setKeys] = useState([]);
+  //const [keys, setKeys] = useState([]);
   //const [positions, setPositions] = useState([[5, 5], [200, 195], [350, 100]]);
-  const keyCodes = useRef([32, 65, 68]);
+  const keyCodes = useRef([32, 65, 68, 87]);
   const canvasRef = useRef(null);
 
   const addToKeys = useRef((e) => {
-    const newKeys = keys;
+    const newKeys = gameState.keys_pressed;
     if (newKeys.indexOf(e.keyCode) === -1) {
       if (keyCodes.current.indexOf(e.keyCode) !== -1) {
         newKeys.push(e.keyCode);
       }
     }
-    setKeys(newKeys);
+    dispatchGameState({type: "updateKeys", keys_pressed: newKeys});
   });
 
   const removeFromKeys = useRef((e) => {
-    const newKeys = keys;
+    const newKeys = gameState.keys_pressed;
     const index = newKeys.indexOf(e.keyCode);
     if (index !== -1) {
       newKeys.splice(index, 1);
     }
-    setKeys(newKeys);
+    dispatchGameState({type: "updateKeys", keys_pressed: newKeys});
   });
 
   useEffect(() => {
@@ -36,21 +36,17 @@ export const GameContainer = props => {
   }, []);
 
   const updateGameState = gameState => {
-    // gameState = { 
-    //   positions: positions, 
-    //   keys_pressed: keys 
-    // };
-    console.log("before", gameState)
     const newGameState = props.rustFuncs.update_game_state(gameState);
-    console.log("after", gameState)
     return newGameState;
   };
 
   const gameStateReducer = (state, action) => {
     switch (action.type) {
-      case "update":
+      case "updatePositions":
         const newGameState = updateGameState(state);
         return newGameState;
+      case "updateKeys":
+        return {...state, keys_pressed: action.keys_pressed}
       default:
         throw new Error();
     }
@@ -58,7 +54,7 @@ export const GameContainer = props => {
 
   const [gameState, dispatchGameState] = useReducer(gameStateReducer, {
     positions: [[5, 5], [200, 195], [350, 100]],
-    keys_pressed: keys
+    keys_pressed: []
   });
 
   const drawCanvas = () => {
@@ -70,7 +66,7 @@ export const GameContainer = props => {
   };
 
   useEffect(drawCanvas);
-  useOneFrame(() => dispatchGameState({ type: "update" }));
+  useOneFrame(() => dispatchGameState({type: "updatePositions"}));
 
   return (
     <canvas ref={canvasRef} width="500" height="200" className="gameCanvas" />
