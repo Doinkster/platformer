@@ -42,7 +42,7 @@ export const GameContainer = props => {
 
   const gameStateReducer = (state, action) => {
     switch (action.type) {
-      case "updatePositions":
+      case "updateGameState":
         const newGameState = updateGameState(state);
         return newGameState;
       case "updateKeys":
@@ -53,8 +53,22 @@ export const GameContainer = props => {
   };
 
   const [gameState, dispatchGameState] = useReducer(gameStateReducer, {
-    positions: [[5, 5], [200, 195], [350, 100]],
-    keys_pressed: []
+    player: {
+      positionX: 5,
+      positionY: 5,
+      velocityX: 0,
+      velocityY: 0,
+      playerJumping: false,
+    },
+    entities: {
+      positionsX: [5, 200, 350],
+      positionsY: [40, 195, 100],
+      velocitiesX: [0, 0, 0],
+      velocitiesY: [0, 0, 0],
+      entitiesJumping: [false, false, false]
+    },
+    keys_pressed: [],
+    player_jumping: false
   });
 
   const drawCanvas = () => {
@@ -66,7 +80,7 @@ export const GameContainer = props => {
   };
 
   useEffect(drawCanvas);
-  useOneFrame(() => dispatchGameState({type: "updatePositions"}));
+  useOneFrame(() => dispatchGameState({type: "updateGameState"}));
 
   return (
     <canvas ref={canvasRef} width="500" height="200" className="gameCanvas" />

@@ -30,18 +30,32 @@ struct GameState {
 }
 
 impl GameState {
-    fn decrease_x() {
-        
+    fn decrease_x(&mut self) {
+        self.positions[0].0 -= 1;
     }
 
-    fn increase_x() {
-        
+    fn increase_x(&mut self) {
+        self.positions[0].0 += 1;
+    }
+
+    fn decrease_y(&mut self) {
+        self.positions[0].1 += 1;
+    }
+
+    fn increase_y(&mut self) {
+        self.positions[0].1 -= 1;
     }
 
     fn update_player(&mut self) {
         //keys = [32, 65, 68, 87]
+        if self.keys_pressed.contains(&68) {
+            self.increase_x();
+        } 
         if self.keys_pressed.contains(&65) {
-            self.positions[0].0 += 1;
+            self.decrease_x();
+        }
+        if self.keys_pressed.contains(&32) || self.keys_pressed.contains(&87) {
+            self.increase_y();
         }
     }
 
@@ -70,7 +84,8 @@ fn update_game_state(js_game_state: Reference) -> GameState {
         console.log("GAMESTATE", gameState);
         return {
             positions: gameState.positions,
-            keys_pressed: gameState.keys_pressed
+            keys_pressed: gameState.keys_pressed,
+            player_jumping: gameState.player_jumping
         };
     );
 
