@@ -23,7 +23,10 @@ use serde_json::{Value};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct GameState {
-    positions: Vec<(i32, i32)>,
+    //positions: Vec<(i32, i32)>,
+    player: Vec<f32>,
+    entities: Vec<Vec<f32>>,
+    level: Vec<Vec<f32>>,
     keys_pressed: Vec<i32>
     // velocities: Vec<(i32, i32)>,
     // height_widths: Vec<(i32, i32)>
@@ -31,19 +34,23 @@ struct GameState {
 
 impl GameState {
     fn decrease_x(&mut self) {
-        self.positions[0].0 -= 1;
+        //self.positions[0].0 -= 1;
+        self.player[0] -= 1.0;
     }
 
     fn increase_x(&mut self) {
-        self.positions[0].0 += 1;
+        //self.positions[0].0 += 1;
+        self.player[0] += 1.0;
     }
 
     fn decrease_y(&mut self) {
-        self.positions[0].1 += 1;
+        //self.positions[0].1 += 1;
+        self.player[1] += 1.0;
     }
 
     fn increase_y(&mut self) {
-        self.positions[0].1 -= 1;
+        //self.positions[0].1 -= 1;
+        self.player[1] -= 1.0;
     }
 
     fn update_player(&mut self) {
@@ -59,7 +66,11 @@ impl GameState {
         }
     }
 
-    fn update_positions(&mut self) -> &Vec<(i32, i32)> {
+    fn applyEntityLogic() {
+        
+    }
+
+    fn update_positions(&mut self) -> &Vec<f32> {
         // for tuple in &mut self.positions {
         //     tuple.0 += 1;
         //     tuple.1 += 1;
@@ -67,7 +78,7 @@ impl GameState {
         &self.update_player();
         //update_npcs();
         //self.check_collisions();
-        &self.positions
+        &self.player
     }
 
     
@@ -81,11 +92,12 @@ js_deserializable!( GameState );
 fn update_game_state(js_game_state: Reference) -> GameState {
     let js_game_state_deserialized = js!(
         let gameState = @{js_game_state};
-        console.log("GAMESTATE", gameState);
+        console.log("GAMESTATE", gameState.keys_pressed);
         return {
-            positions: gameState.positions,
+            player: gameState.player,
+            entities: gameState.entities,
+            level: gameState.level,
             keys_pressed: gameState.keys_pressed,
-            player_jumping: gameState.player_jumping
         };
     );
 
