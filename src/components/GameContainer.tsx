@@ -123,7 +123,8 @@ export const GameContainer = props => {
       { entity_type: 1, index: 3 },
       { entity_type: 2, index: 4 }
     ],
-    keys_pressed: []
+    keys_pressed: [],
+    //canvas: {height: .....}
   });
 
   const drawCanvas = () => {

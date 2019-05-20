@@ -51,6 +51,17 @@ struct GameState {
 }
 
 fn all_entities_update(component: &mut PhysicsComponent) {
+    if component.position_x >= 500.0 {
+        component.position_x = 500.0 - component.width as f32;
+    } else if component.position_x <= 0.0 {
+        component.position_x = 0.0;
+    }
+
+    if component.position_y >= 150.0 - component.height as f32 {
+        component.position_y = 150.0 - component.height as f32;
+        component.jumping = 0;
+    }
+
     component.velocity_x *= component.friction;
     component.velocity_y += component.gravity;
     component.position_x += component.velocity_x;
@@ -70,7 +81,10 @@ fn update_player(player_component: &mut PhysicsComponent, keys_pressed: &Vec<i32
         }
     }
     if keys_pressed.contains(&32) || keys_pressed.contains(&87) {
-        player_component.velocity_y -= 0.5;
+        if player_component.jumping == 0 {
+            player_component.jumping = 1;
+            player_component.velocity_y = player_component.max_speed * 2.0;
+        }
     }
     all_entities_update(player_component);
 }
