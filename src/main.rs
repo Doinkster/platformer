@@ -47,35 +47,7 @@ struct GameState {
 }
 
 impl<'a> GameState {
-    fn increase_entity_x(&mut self, entity: &'a mut Vec<f32>) -> &'a mut Vec<f32> {
-        //self.player[0][0] += 1.0;
-        //const new_position = self.increase_int(entity[0][0]);
-        entity[0] = entity[0] + 1.0;
-        entity
-    }
-
-    fn decrease_entity_x(&mut self, entity: &'a mut Vec<f32>) -> &'a mut Vec<f32> {
-        //self.player[0][0] += 1.0;
-        //const new_position = self.increase_int(entity[0][0]);
-        entity[0] = entity[0] - 1.0;
-        entity
-    }
-
-    // fn increase_entity_y(&self, entity: Vec<f32>) -> Vec<f32> {
-    //     //self.player[0][0] += 1.0;
-    //     //const new_position = self.increase_int(entity[0][0]);
-    //     entity[1] = entity[1] + 1.0;
-    //     entity
-    // }
-
-    // fn decrease_entity_y(&self, entity: Vec<f32>) -> Vec<f32> {
-    //     //self.player[0][0] += 1.0;
-    //     //const new_position = self.increase_int(entity[0][0]);
-    //     entity[1] = entity[1] - 1.0;
-    //     entity
-    // }
-
-    fn update_player(&mut self, mut player_component: PhysicsComponent) {
+    fn update_player(&mut self, player_component: &mut PhysicsComponent) {
         //keys = [32, 65, 68, 87]
         if self.keys_pressed.contains(&68) {
             player_component.positionX += 1.0;
@@ -95,13 +67,15 @@ impl<'a> GameState {
 
     fn update(mut self, mut phyiscal_components: Vec<PhysicsComponent>, entity_indexes: Vec<EntityIndexes>) -> GameState {
         for entity in entity_indexes {
-            match entity.entity_type {
-                Some(0) => self.update_player(phyiscal_components[entity.index]),
-                Some(1) => self.update_npc(),
-                Some(_) => panic!(),
-                None => panic!()
+            // match entity.entity_type {
+            //     Some(0) => &self.update_player(phyiscal_components[entity.index]),
+            //     Some(1) => &self.update_npc(),
+            //     Some(_) => panic!(),
+            //     None => panic!()
+            // }
+            if entity.entity_type == Some(0) {
+                self.update_player(&mut phyiscal_components[entity.index])
             }
-            //if entity.entity_type
         };
         self
     }
