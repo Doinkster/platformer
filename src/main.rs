@@ -46,65 +46,35 @@ struct GameState {
     keys_pressed: Vec<i32>
 }
 
-impl<'a> GameState {
-    fn increase_entity_x(&mut self, entity: &'a mut Vec<f32>) -> &'a mut Vec<f32> {
-        //self.player[0][0] += 1.0;
-        //const new_position = self.increase_int(entity[0][0]);
-        entity[0] = entity[0] + 1.0;
-        entity
-    }
-
-    fn decrease_entity_x(&mut self, entity: &'a mut Vec<f32>) -> &'a mut Vec<f32> {
-        //self.player[0][0] += 1.0;
-        //const new_position = self.increase_int(entity[0][0]);
-        entity[0] = entity[0] - 1.0;
-        entity
-    }
-
-    // fn increase_entity_y(&self, entity: Vec<f32>) -> Vec<f32> {
-    //     //self.player[0][0] += 1.0;
-    //     //const new_position = self.increase_int(entity[0][0]);
-    //     entity[1] = entity[1] + 1.0;
-    //     entity
-    // }
-
-    // fn decrease_entity_y(&self, entity: Vec<f32>) -> Vec<f32> {
-    //     //self.player[0][0] += 1.0;
-    //     //const new_position = self.increase_int(entity[0][0]);
-    //     entity[1] = entity[1] - 1.0;
-    //     entity
-    // }
-
-    fn update_player(&mut self, mut player_component: PhysicsComponent) {
+fn update_player(player_component: &mut PhysicsComponent, keys_pressed: &Vec<i32>) {
         //keys = [32, 65, 68, 87]
-        if self.keys_pressed.contains(&68) {
+        if keys_pressed.contains(&68) {
             player_component.positionX += 1.0;
         } 
-        if self.keys_pressed.contains(&65) {
+        if keys_pressed.contains(&65) {
             player_component.positionX -= 1.0;
         }
-        if self.keys_pressed.contains(&32) || self.keys_pressed.contains(&87) {
+        if keys_pressed.contains(&32) || keys_pressed.contains(&87) {
             player_component.positionY += 1.0;
         }
     }
 
-    fn update_npc(&mut self) {
-        
-    }
+fn update_npc() {
+    
+}
 
 
-    fn update(mut self, mut phyiscal_components: Vec<PhysicsComponent>, entity_indexes: Vec<EntityIndexes>) -> GameState {
-        for entity in entity_indexes {
-            match entity.entity_type {
-                Some(0) => self.update_player(phyiscal_components[entity.index]),
-                Some(1) => self.update_npc(),
-                Some(_) => panic!(),
-                None => panic!()
-            }
-            //if entity.entity_type
-        };
-        self
-    }
+fn update(mut game_state: GameState) -> GameState {
+    for entity in &game_state.entity_indexes {
+        match entity.entity_type {
+            Some(0) => update_player(&mut game_state.phyiscal_components[entity.index], &game_state.keys_pressed),
+            Some(1) => update_npc(),
+            Some(_) => panic!(),
+            None => panic!()
+        }
+        //if entity.entity_type
+    };
+    game_state
 }
 
 js_serializable!( GameState );
@@ -123,10 +93,12 @@ fn update_game_state(js_game_state: Reference) -> GameState {
     );
 
     let mut game_state: GameState = js_game_state_deserialized.try_into().unwrap();
-    let mut phyiscal_components = game_state.phyiscal_components.clone();
-    let entity_indexes = game_state.entity_indexes.clone();
-    game_state.update(phyiscal_components, entity_indexes)
-    //game_state
+    update(game_state)
+    // let mut phyiscal_components = game_state.phyiscal_components.clone();
+    // let entity_indexes = game_state.entity_indexes.clone();
+    // let keys_pressed = game_state.keys_pressed.clone();
+    //update(phyiscal_components, entity_indexes, keys_pressed)
+    
 }
 
 fn main() {
