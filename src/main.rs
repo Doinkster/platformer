@@ -67,15 +67,15 @@ impl<'a> GameState {
 
     fn update(mut self, mut phyiscal_components: Vec<PhysicsComponent>, entity_indexes: Vec<EntityIndexes>) -> GameState {
         for entity in entity_indexes {
-            // match entity.entity_type {
-            //     Some(0) => &self.update_player(phyiscal_components[entity.index]),
-            //     Some(1) => &self.update_npc(),
-            //     Some(_) => panic!(),
-            //     None => panic!()
-            // }
-            if entity.entity_type == Some(0) {
-                self.update_player(&mut phyiscal_components[entity.index])
+            match entity.entity_type {
+                Some(0) => self.update_player(&mut phyiscal_components[entity.index]),
+                Some(1) => self.update_npc(),
+                Some(_) => panic!(),
+                None => panic!()
             }
+            // if entity.entity_type == Some(0) {
+            //     self.update_player(&mut phyiscal_components[entity.index])
+            // }
         };
         self
     }
