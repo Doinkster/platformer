@@ -36,7 +36,9 @@ export const GameContainer = props => {
   }, []);
 
   const updateGameState = gameState => {
+    console.log("GAME STATE", gameState);
     const newGameState = props.rustFuncs.update_game_state(gameState);
+    console.log("NEW GAME STATE", newGameState);
     return newGameState;
   };
 
@@ -55,68 +57,68 @@ export const GameContainer = props => {
   const [gameState, dispatchGameState] = useReducer(gameStateReducer, {
     physical_components: [
       {
-        positionX: 5,
-        positionY: 5,
-        velocityX: 0,
-        velocityY: 0,
+        position_x: 5.0,
+        position_y: 5.0,
+        velocity_x: 0.0,
+        velocity_y: 0.0,
         width: 5,
         height: 5,
-        jumping: false,
+        jumping: 0,
         gravity: 0.3,
         friction: 0.8
       },
       {
-        positionX: 200,
-        positionY: 195,
-        velocityX: 0,
-        velocityY: 0,
+        position_x: 200.0,
+        position_y: 195.0,
+        velocity_x: 0.0,
+        velocity_y: 0.0,
         width: 5,
         height: 30,
-        jumping: false,
+        jumping: 0,
         gravity: 0.3,
         friction: 0.8
       },
       {
-        positionX: 350,
-        positionY: 105,
-        velocityX: 0,
-        velocityY: 0,
+        position_x: 350.0,
+        position_y: 105.0,
+        velocity_x: 0.0,
+        velocity_y: 0.0,
         width: 15,
         height: 15,
-        jumping: false,
+        jumping: 0,
         gravity: 0.3,
         friction: 0.8
       },
       {
-        positionX: 5,
-        positionY: 5,
-        velocityX: 0,
-        velocityY: 0,
+        position_x: 5.0,
+        position_y: 5.0,
+        velocity_x: 0.0,
+        velocity_y: 0.0,
         width: 30,
         height: 5,
-        jumping: false,
+        jumping: 0,
         gravity: 0.3,
         friction: 0.8
       },
       {
-        positionX: 450,
-        positionY: 150,
-        velocityX: 0,
-        velocityY: 0,
+        position_x: 450.0,
+        position_y: 150.0,
+        velocity_x: 0.0,
+        velocity_y: 0.0,
         width: 400,
         height: 30,
-        jumping: false,
+        jumping: 0,
         gravity: 0.3,
         friction: 0.8
       }
     ],
+    //entity_type: 0 = player, 1 = npc, 2 = level
     entity_indexes: [
-      //0 = player, 1 = npc, 2 = level
-      { type: 0, index: 0 },
-      { type: 1, index: 1 },
-      { type: 1, index: 2 },
-      { type: 1, index: 3 },
-      { type: 2, index: 4 }
+      { entity_type: 0, index: 0 },
+      { entity_type: 1, index: 1 },
+      { entity_type: 1, index: 2 },
+      { entity_type: 1, index: 3 },
+      { entity_type: 2, index: 4 }
     ],
     keys_pressed: []
   });
@@ -137,7 +139,12 @@ export const GameContainer = props => {
     //   ctx.fillRect(level[0], level[1], level[2], level[3]);
     // });
     gameState.physical_components.forEach(entity => {
-      ctx.fillRect(entity.positionX, entity.positionY, entity.width, entity.height);
+      ctx.fillRect(
+        entity.position_x,
+        entity.position_y,
+        entity.width,
+        entity.height
+      );
     });
   };
 

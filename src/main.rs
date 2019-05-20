@@ -16,51 +16,49 @@ use stdweb::__js_raw_asm;
 use stdweb::{Reference};
 use stdweb::unstable::TryInto;
 
+#[allow(unused_imports)] use stdweb::console;
+#[allow(unused_imports)] use stdweb::__internal_console_unsafe;
+
 use serde::{Serialize, Deserialize};
 use serde_json;
 #[allow(unused_imports)] use serde_json::{Value};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
 struct PhysicsComponent {
-    positionX: f32,
-    positionY: f32,
-    velocityX: f32,
-    velocityY: f32,
-    width: f32,
-    height: f32,
-    jumping: bool,
+    position_x: f32,
+    position_y: f32,
+    velocity_x: f32,
+    velocity_y: f32,
+    width: i32,
+    height: i32,
+    jumping: i32,
     gravity: f32,
     friction: f32
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
 struct EntityIndexes {
-    entity_type: Option<u32>,
+    entity_type: i32,
     index: usize
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
 struct GameState {
-    phyiscal_components: Vec<PhysicsComponent>,
+    physical_components: Vec<PhysicsComponent>,
     entity_indexes: Vec<EntityIndexes>,
     keys_pressed: Vec<i32>
 }
 
-<<<<<<< HEAD
-impl<'a> GameState {
-    fn update_player(&mut self, player_component: &mut PhysicsComponent) {
-=======
 fn update_player(player_component: &mut PhysicsComponent, keys_pressed: &Vec<i32>) {
->>>>>>> refactorGameStateMethods
         //keys = [32, 65, 68, 87]
         if keys_pressed.contains(&68) {
-            player_component.positionX += 1.0;
+            player_component.position_x += 1.0
         } 
         if keys_pressed.contains(&65) {
-            player_component.positionX -= 1.0;
+            player_component.position_x -= 1.0
         }
         if keys_pressed.contains(&32) || keys_pressed.contains(&87) {
-            player_component.positionY += 1.0;
+            player_component.position_y += 1.0
         }
     }
 
@@ -68,35 +66,16 @@ fn update_npc() {
     
 }
 
-
-<<<<<<< HEAD
-    fn update(mut self, mut phyiscal_components: Vec<PhysicsComponent>, entity_indexes: Vec<EntityIndexes>) -> GameState {
-        for entity in entity_indexes {
-            match entity.entity_type {
-                Some(0) => self.update_player(&mut phyiscal_components[entity.index]),
-                Some(1) => self.update_npc(),
-                Some(_) => panic!(),
-                None => panic!()
-            }
-            // if entity.entity_type == Some(0) {
-            //     self.update_player(&mut phyiscal_components[entity.index])
-            // }
-        };
-        self
-    }
-=======
 fn update(mut game_state: GameState) -> GameState {
     for entity in &game_state.entity_indexes {
         match entity.entity_type {
-            Some(0) => update_player(&mut game_state.phyiscal_components[entity.index], &game_state.keys_pressed),
-            Some(1) => update_npc(),
-            Some(_) => panic!(),
-            None => panic!()
+            0 => update_player(&mut game_state.physical_components[entity.index], &game_state.keys_pressed),
+            1 => update_npc(),
+            2 => update_npc(),
+            _ => panic!()
         }
-        //if entity.entity_type
     };
     game_state
->>>>>>> refactorGameStateMethods
 }
 
 js_serializable!( GameState );
@@ -106,21 +85,15 @@ js_deserializable!( GameState );
 fn update_game_state(js_game_state: Reference) -> GameState {
     let js_game_state_deserialized = js!(
         let gameState = @{js_game_state};
-        console.log("GAMESTATE", gameState.keys_pressed);
         return {
-            phyiscal_components: gameState.phyiscal_components,
+            physical_components: gameState.physical_components,
             entity_indexes: gameState.entity_indexes,
             keys_pressed: gameState.keys_pressed,
         };
     );
 
-    let mut game_state: GameState = js_game_state_deserialized.try_into().unwrap();
+    let game_state: GameState = js_game_state_deserialized.try_into().unwrap();
     update(game_state)
-    // let mut phyiscal_components = game_state.phyiscal_components.clone();
-    // let entity_indexes = game_state.entity_indexes.clone();
-    // let keys_pressed = game_state.keys_pressed.clone();
-    //update(phyiscal_components, entity_indexes, keys_pressed)
-    
 }
 
 fn main() {
