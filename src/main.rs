@@ -20,15 +20,30 @@ use serde::{Serialize, Deserialize};
 use serde_json;
 #[allow(unused_imports)] use serde_json::{Value};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct PhysicsComponent {
+    positionX: f32,
+    positionY: f32,
+    velocityX: f32,
+    velocityY: f32,
+    width: f32,
+    height: f32,
+    jumping: bool,
+    gravity: f32,
+    friction: f32
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct EntityIndexes {
+    entity_type: Option<u32>,
+    index: usize
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct GameState {
-    //positions: Vec<(i32, i32)>,
-    player: Vec<Vec<f32>>,
-    npcs: Vec<Vec<f32>>,
-    level: Vec<Vec<f32>>,
+    phyiscal_components: Vec<PhysicsComponent>,
+    entity_indexes: Vec<EntityIndexes>,
     keys_pressed: Vec<i32>
-    // velocities: Vec<(i32, i32)>,
-    // height_widths: Vec<(i32, i32)>
 }
 
 impl<'a> GameState {
@@ -60,67 +75,40 @@ impl<'a> GameState {
     //     entity
     // }
 
-    // fn decrease_y(&mut self) {
-    //     self.player[1] += 1.0;
-    // }
-
-    // fn increase_y(&mut self) {
-    //     self.player[1] -= 1.0;
-    // }
-
-    fn update_players(&mut self) {
+    fn update_player(&mut self, mut player_component: PhysicsComponent) {
         //keys = [32, 65, 68, 87]
         if self.keys_pressed.contains(&68) {
-            //&mut self.increase_entity_x(&mut self.player[0]);
-            self.player[0] = self.increase_entity_x(&mut self.player[0]).to_vec();
+            player_component.positionX += 1.0;
         } 
         if self.keys_pressed.contains(&65) {
-            self.player[0] = self.decrease_entity_x(&mut self.player[0]).to_vec();
+            player_component.positionX -= 1.0;
         }
-        // if self.keys_pressed.contains(&32) || self.keys_pressed.contains(&87) {
-        //     &mut self.increase_entity_y(self.player[1]);
-        // }
+        if self.keys_pressed.contains(&32) || self.keys_pressed.contains(&87) {
+            player_component.positionY += 1.0;
+        }
     }
 
-    fn update_npcs() {
+    fn update_npc(&mut self) {
         
     }
 
-    fn update_positions(&mut self) -> &Vec<f32> {
-        &self.update_players();
-        //update_npcs();
-        //self.check_collisions();
-        &self.player[0]
-    }
 
-    fn update(&mut self) {
-
+    fn update(mut self, mut phyiscal_components: Vec<PhysicsComponent>, entity_indexes: Vec<EntityIndexes>) -> GameState {
+        for entity in entity_indexes {
+            match entity.entity_type {
+                Some(0) => self.update_player(phyiscal_components[entity.index]),
+                Some(1) => self.update_npc(),
+                Some(_) => panic!(),
+                None => panic!()
+            }
+            //if entity.entity_type
+        };
+        self
     }
 }
 
 js_serializable!( GameState );
 js_deserializable!( GameState );
-
-// player: [5, 5, 5, 5, 0, 0, 0.3, 0.8, 0],
-// npcs: [
-//   [5  , 40 , 5 , 30, 0, 0, 0.3, 0.8, 0],
-//   [200, 195, 15, 15, 0, 0, 0.3, 0.8, 0],
-//   [350, 100, 30, 5 , 0, 0, 0.3, 0.8, 0]
-// ],
-// level: [[450, 150, 0, 0, 400, 30, 0, 0, 0]],
-
-// phyiscal_components: [
-//     [5, 5, 5, 5, 0, 0, 0.3, 0.8, 0], 
-//     [5  , 40 , 5 , 30, 0, 0, 0.3, 0.8, 0],
-//     [200, 195, 15, 15, 0, 0, 0.3, 0.8, 0],
-//     [350, 100, 30, 5 , 0, 0, 0.3, 0.8, 0],
-//     [450, 150, 0, 0, 400, 30, 0, 0, 0]
-// ]
-
-// entity_index: [
-//     {type: player, index: 0},
-//     {type: npc, index: 1}
-// ]
 
 #[js_export]
 fn update_game_state(js_game_state: Reference) -> GameState {
@@ -128,16 +116,17 @@ fn update_game_state(js_game_state: Reference) -> GameState {
         let gameState = @{js_game_state};
         console.log("GAMESTATE", gameState.keys_pressed);
         return {
-            player: gameState.player,
-            npcs: gameState.npcs,
-            level: gameState.level,
+            phyiscal_components: gameState.phyiscal_components,
+            entity_indexes: gameState.entity_indexes,
             keys_pressed: gameState.keys_pressed,
         };
     );
 
     let mut game_state: GameState = js_game_state_deserialized.try_into().unwrap();
-    game_state.update();
-    game_state
+    let mut phyiscal_components = game_state.phyiscal_components.clone();
+    let entity_indexes = game_state.entity_indexes.clone();
+    game_state.update(phyiscal_components, entity_indexes)
+    //game_state
 }
 
 fn main() {

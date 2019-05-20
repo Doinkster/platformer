@@ -62,8 +62,8 @@ export const GameContainer = props => {
         width: 5,
         height: 5,
         jumping: false,
-        gravity: .3,
-        friction: .8
+        gravity: 0.3,
+        friction: 0.8
       },
       {
         positionX: 200,
@@ -73,8 +73,8 @@ export const GameContainer = props => {
         width: 5,
         height: 30,
         jumping: false,
-        gravity: .3,
-        friction: .8
+        gravity: 0.3,
+        friction: 0.8
       },
       {
         positionX: 350,
@@ -84,9 +84,10 @@ export const GameContainer = props => {
         width: 15,
         height: 15,
         jumping: false,
-        gravity: .3,
-        friction: .8
-      },{
+        gravity: 0.3,
+        friction: 0.8
+      },
+      {
         positionX: 5,
         positionY: 5,
         velocityX: 0,
@@ -94,8 +95,8 @@ export const GameContainer = props => {
         width: 30,
         height: 5,
         jumping: false,
-        gravity: .3,
-        friction: .8
+        gravity: 0.3,
+        friction: 0.8
       },
       {
         positionX: 450,
@@ -105,17 +106,17 @@ export const GameContainer = props => {
         width: 400,
         height: 30,
         jumping: false,
-        gravity: .3,
-        friction: .8
+        gravity: 0.3,
+        friction: 0.8
       }
     ],
     entity_indexes: [
       //0 = player, 1 = npc, 2 = level
-      {type: 0, index: 0},
-      {type: 1, index: 1},
-      {type: 1, index: 2},
-      {type: 1, index: 3},
-      {type: 2, index: 4},
+      { type: 0, index: 0 },
+      { type: 1, index: 1 },
+      { type: 1, index: 2 },
+      { type: 1, index: 3 },
+      { type: 2, index: 4 }
     ],
     keys_pressed: []
   });
@@ -123,27 +124,20 @@ export const GameContainer = props => {
   const drawCanvas = () => {
     const ctx = canvasRef.current.getContext("2d");
     ctx.clearRect(0, 0, 500, 200);
-    ctx.fillRect(
-      gameState.player[0],
-      gameState.player[1],
-      gameState.player[2],
-      gameState.player[3]
-    )
-    gameState.npcs.forEach((entity) => {
-      ctx.fillRect(
-        entity[0],
-        entity[1],
-        entity[2],
-        entity[3]
-      );
-    });
-    gameState.level.forEach((level, index) => {
-      ctx.fillRect(
-        level[0],
-        level[1],
-        level[2],
-        level[3]
-      );
+    // ctx.fillRect(
+    //   gameState.player[0],
+    //   gameState.player[1],
+    //   gameState.player[2],
+    //   gameState.player[3]
+    // );
+    // gameState.npcs.forEach(entity => {
+    //   ctx.fillRect(entity[0], entity[1], entity[2], entity[3]);
+    // });
+    // gameState.level.forEach((level, index) => {
+    //   ctx.fillRect(level[0], level[1], level[2], level[3]);
+    // });
+    gameState.physical_components.forEach(entity => {
+      ctx.fillRect(entity.positionX, entity.positionY, entity.width, entity.height);
     });
   };
 
