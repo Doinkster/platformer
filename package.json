@@ -19,6 +19,7 @@
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "awesome-typescript-loader": "^5.2.1",
+    "copy-webpack-plugin": "^5.0.3",
     "env": "0.0.2",
     "fs": "0.0.1-security",
     "source-map-loader": "^0.2.4",

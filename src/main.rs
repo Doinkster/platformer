@@ -29,6 +29,7 @@ struct PhysicsComponent {
     position_y: f32,
     velocity_x: f32,
     velocity_y: f32,
+    max_speed: f32,
     width: i32,
     height: i32,
     jumping: i32,
@@ -49,18 +50,30 @@ struct GameState {
     keys_pressed: Vec<i32>
 }
 
+fn all_entities_update(component: &mut PhysicsComponent) {
+    component.velocity_x *= component.friction;
+    component.velocity_y += component.gravity;
+    component.position_x += component.velocity_x;
+    component.position_y += component.velocity_y;
+}
+
 fn update_player(player_component: &mut PhysicsComponent, keys_pressed: &Vec<i32>) {
-        //keys = [32, 65, 68, 87]
-        if keys_pressed.contains(&68) {
-            player_component.position_x += 1.0
-        } 
-        if keys_pressed.contains(&65) {
-            player_component.position_x -= 1.0
+    //keys = [32 = space, 65 = a, 68 = d, 87 = w]
+    if keys_pressed.contains(&68) {
+        if player_component.velocity_x < player_component.max_speed {
+            player_component.velocity_x += 0.5;
         }
-        if keys_pressed.contains(&32) || keys_pressed.contains(&87) {
-            player_component.position_y += 1.0
+    } 
+    if keys_pressed.contains(&65) {
+        if player_component.velocity_x > -player_component.max_speed {
+            player_component.velocity_x -= 0.5;
         }
     }
+    if keys_pressed.contains(&32) || keys_pressed.contains(&87) {
+        player_component.velocity_y -= 0.5;
+    }
+    all_entities_update(player_component);
+}
 
 fn update_npc() {
     

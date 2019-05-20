@@ -1,4 +1,5 @@
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/index.tsx',
@@ -8,13 +9,13 @@ module.exports = {
   },
   module: {
     rules: [
-    {
-      test: /\.tsx?$/,
-      use: {
-        loader: 'ts-loader'
-      },
-      exclude: /node_modules/
-    }
+      {
+        test: /\.tsx?$/,
+        use: {
+          loader: 'ts-loader'
+        },
+        exclude: /node_modules/
+      }
     ]
   },
   resolve: {
@@ -24,6 +25,12 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, 'dist'),
     compress: true,
-    port: 9000
-  }
+    port: 9000,
+    writeToDisk: true
+  },
+  plugins: [
+    new CopyPlugin([
+      { from: 'target/wasm32-unknown-unknown/debug/scroller.wasm', to: ''},
+    ])
+  ]
 };

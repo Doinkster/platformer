@@ -36,9 +36,7 @@ export const GameContainer = props => {
   }, []);
 
   const updateGameState = gameState => {
-    console.log("GAME STATE", gameState);
     const newGameState = props.rustFuncs.update_game_state(gameState);
-    console.log("NEW GAME STATE", newGameState);
     return newGameState;
   };
 
@@ -61,6 +59,7 @@ export const GameContainer = props => {
         position_y: 5.0,
         velocity_x: 0.0,
         velocity_y: 0.0,
+        max_speed: 5,
         width: 5,
         height: 5,
         jumping: 0,
@@ -72,6 +71,7 @@ export const GameContainer = props => {
         position_y: 195.0,
         velocity_x: 0.0,
         velocity_y: 0.0,
+        max_speed: 5,
         width: 5,
         height: 30,
         jumping: 0,
@@ -83,6 +83,7 @@ export const GameContainer = props => {
         position_y: 105.0,
         velocity_x: 0.0,
         velocity_y: 0.0,
+        max_speed: 5,
         width: 15,
         height: 15,
         jumping: 0,
@@ -94,6 +95,7 @@ export const GameContainer = props => {
         position_y: 5.0,
         velocity_x: 0.0,
         velocity_y: 0.0,
+        max_speed: 5,
         width: 30,
         height: 5,
         jumping: 0,
@@ -105,6 +107,7 @@ export const GameContainer = props => {
         position_y: 150.0,
         velocity_x: 0.0,
         velocity_y: 0.0,
+        max_speed: 5,
         width: 400,
         height: 30,
         jumping: 0,
@@ -112,8 +115,8 @@ export const GameContainer = props => {
         friction: 0.8
       }
     ],
-    //entity_type: 0 = player, 1 = npc, 2 = level
     entity_indexes: [
+      //entity_type: 0 = player, 1 = npc, 2 = level
       { entity_type: 0, index: 0 },
       { entity_type: 1, index: 1 },
       { entity_type: 1, index: 2 },
@@ -126,18 +129,6 @@ export const GameContainer = props => {
   const drawCanvas = () => {
     const ctx = canvasRef.current.getContext("2d");
     ctx.clearRect(0, 0, 500, 200);
-    // ctx.fillRect(
-    //   gameState.player[0],
-    //   gameState.player[1],
-    //   gameState.player[2],
-    //   gameState.player[3]
-    // );
-    // gameState.npcs.forEach(entity => {
-    //   ctx.fillRect(entity[0], entity[1], entity[2], entity[3]);
-    // });
-    // gameState.level.forEach((level, index) => {
-    //   ctx.fillRect(level[0], level[1], level[2], level[3]);
-    // });
     gameState.physical_components.forEach(entity => {
       ctx.fillRect(
         entity.position_x,
@@ -159,6 +150,3 @@ export const GameContainer = props => {
 // http://www.somethinghitme.com/2013/01/09/creating-a-canvas-platformer-tutorial-part-one/
 // https://medium.com/@lavrton/using-react-with-html5-canvas-871d07d8d753
 // https://codesandbox.io/s/ojxl32jm4z
-
-// const [velocities, setVelocities] = React.useState([[]]);
-// const [heights_widths, setHeights_widths] = React.useState([[]]);

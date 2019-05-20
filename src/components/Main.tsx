@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import rustFuncs from "../../static/scroller.js";
+import rustFuncs from "../../target/wasm32-unknown-unknown/debug/scroller.js";
 import { GameContainer } from "./index";
 
 export const Main = props => {
