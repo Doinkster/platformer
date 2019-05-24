@@ -94,7 +94,7 @@ fn get_collision_direction(entity_a: &mut PhysicsComponent, entity_b: &mut Physi
     //half widths == minimum distance needed between objects before collision
     let half_widths_added = (entity_a.width / 2.0) + (entity_b.width / 2.0);
     let half_heights_added = (entity_a.height / 2.0) + (entity_b.height / 2.0);
-    let collision_direction = -1;
+    let mut collision_direction = -1;
 
     //if collision
     if vector_x_component.abs() < half_widths_added && vector_y_component.abs() < half_heights_added {
@@ -153,7 +153,7 @@ fn apply_gravity_and_friction(entity: &mut PhysicsComponent) {
     entity.velocity_y += entity.gravity;
 }
 
-fn check_collisions(entity: &mut PhysicsComponent, entity_index: &mut EntityIndex, entitys: &mut Vec<PhysicsComponent>, indexes: &Vec <EntityIndex>) {
+fn check_collisions(entity: &mut PhysicsComponent, entity_index: &EntityIndex, entitys: &mut Vec<PhysicsComponent>, indexes: &Vec <EntityIndex>) {
     //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
     for other_entity_index in indexes {
         if entity_index.index != other_entity_index.index {
@@ -170,11 +170,10 @@ fn check_collisions(entity: &mut PhysicsComponent, entity_index: &mut EntityInde
 }
 
 fn update(mut game_state: GameState) -> GameState {
-    //works without mut? V
     for entity_index in &mut game_state.entity_indexes {
-        let entity = &mut game_state.physical_entitys[entity_index.index];
-        apply_gravity_and_friction(entity);
-        check_collisions(entity, &mut entity_index, &mut game_state.physical_entitys, &game_state.entity_indexes);
+        //let entity = &mut game_state.physical_entitys[entity_index.index];
+        apply_gravity_and_friction(&entity_index);
+        check_collisions(entity, &entity_index, &mut game_state.physical_entitys, &game_state.entity_indexes);
         match entity_index.entity_type {
             0 => update_player(entity, &game_state.keys_pressed),
             1 => update_npc(),
