@@ -22,16 +22,17 @@ use serde_json;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct PhysicsComponent {
-    position_x: f32,
-    position_y: f32,
-    velocity_x: f32,
-    velocity_y: f32,
-    max_speed: f32,
-    width: f32,
-    height: f32,
-    jumping: i32,
-    gravity: f32,
-    friction: f32
+    position_x: i32,
+    position_y: i32,
+    velocity_x: i32,
+    velocity_y: i32,
+    max_speed: i32,
+    width: i32,
+    height: i32,
+    jumping: bool,
+    grounded: bool,
+    gravity: i32,
+    friction: i32
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -47,52 +48,62 @@ struct GameState {
     keys_pressed: Vec<i32>
 }
 
-fn update_position(entity: &mut PhysicsComponent) {
+fn update_position(entity: &mut PhysicsComponent, entity_index: &EntityIndex) {
+    //console!(log, "index", entity_index.index as f32);
+    //console!(log, "type", entity_index.entity_type as f32);
+    console!(log, "grounded", entity.grounded);
+    if entity_index.entity_type == 0 && entity.grounded == true {
+        entity.velocity_y = 0;
+    }
     entity.position_x += entity.velocity_x;
     entity.position_y += entity.velocity_y;
 }
 
 fn update_player(player_entity: &mut PhysicsComponent, keys_pressed: &Vec<i32>) {
-    //keys = [32 = space, 65 = a, 68 = d, 87 = w]
+    //keys = [32 = space, 65 = a, 68 = d, 87 = w]player_entity.jumping);player_entity.grounded);keys_pressed);
     if keys_pressed.contains(&32) || keys_pressed.contains(&87) {
-        if player_entity.jumping == 0 {
-            player_entity.jumping = 1;
-            player_entity.velocity_y = -player_entity.max_speed * 2.0;
+        if player_entity.jumping == false && player_entity.grounded == true {
+            player_entity.jumping = true;
+            player_entity.grounded = false;
+            player_entity.velocity_y = -player_entity.max_speed * 2;
         }
     }
     if keys_pressed.contains(&68) {
         if player_entity.velocity_x < player_entity.max_speed {
-            player_entity.velocity_x += 0.5;
+            player_entity.velocity_x += 1;
         }
     } 
     if keys_pressed.contains(&65) {
         if player_entity.velocity_x > -player_entity.max_speed {
-            player_entity.velocity_x -= 0.5;
+            player_entity.velocity_x -= 1;
         }
     }
 }
 
-fn update_npc() {
+// fn update_npc() {
     
-}
+// }
 
 fn get_collision_direction(entitys: &mut Vec<PhysicsComponent>, index: usize, other_index: usize) -> i32 {
     //vector == actual distance between objects
-    let vector_x_component = (entitys[index].position_x + (entitys[index].width / 2.0)) - (entitys[other_index].position_x + (entitys[other_index].width / 2.0));
-    let vector_y_component = (entitys[index].position_y + (entitys[index].width / 2.0)) - (entitys[other_index].position_y + (entitys[other_index].width / 2.0));
+    let vector_x = (entitys[index].position_x + (entitys[index].width / 2)) - 
+        (entitys[other_index].position_x + (entitys[other_index].width / 2));
+    let vector_y = (entitys[index].position_y + (entitys[index].width / 2)) - 
+        (entitys[other_index].position_y + (entitys[other_index].width / 2));
+
     //half widths == minimum distance needed between objects before collision
-    let half_widths_added = (entitys[index].width / 2.0) + (entitys[other_index].width / 2.0);
-    let half_heights_added = (entitys[index].height / 2.0) + (entitys[other_index].height / 2.0);
+    let half_widths_added = (entitys[index].width / 2) + (entitys[other_index].width / 2);
+    let half_heights_added = (entitys[index].height / 2) + (entitys[other_index].height / 2);
     let mut collision_direction = -1;
 
     //if collision
-    if vector_x_component.abs() < half_widths_added && vector_y_component.abs() < half_heights_added {
-        let x_magnitude = half_widths_added - vector_x_component.abs();
-        let y_magnitude = half_heights_added - vector_y_component.abs();
+    if vector_x.abs() < half_widths_added && vector_y.abs() < half_heights_added {
+        let x_magnitude = half_widths_added - vector_x.abs();
+        let y_magnitude = half_heights_added - vector_y.abs();
 
         //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
         if x_magnitude >= y_magnitude {
-            if y_magnitude > 0.0 {
+            if vector_y > 0 {
                 collision_direction = 1;
                 entitys[index].position_y += y_magnitude;
             } else {
@@ -100,7 +111,7 @@ fn get_collision_direction(entitys: &mut Vec<PhysicsComponent>, index: usize, ot
                 entitys[index].position_y -= y_magnitude;
             }
         } else {
-            if x_magnitude > 0.0 {
+            if vector_x > 0 {
                 collision_direction = 0;
                 entitys[index].position_x += x_magnitude;
             } else {
@@ -109,7 +120,6 @@ fn get_collision_direction(entitys: &mut Vec<PhysicsComponent>, index: usize, ot
             }
         }
     }
-
     collision_direction
 }
 
@@ -120,16 +130,19 @@ fn compare_player_to_others_with_collision_direction(
     direction: i32) 
 {
     //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
+    //console!(log, "HERE", index.index as f32);
     if other_index.entity_type == 2 {
         if direction == 0 || direction == 2 {
-            entitys[index.index].velocity_x = 0.0;
-            //entity_a.jumping = 0;
+            entitys[index.index].velocity_x = 0;
+            entitys[index.index].jumping = false;
         }
         if direction == 1 {
-            entitys[index.index].velocity_y = -1.0;
+            entitys[index.index].velocity_y = -1;
         }
         if direction == 3 {
-            entitys[index.index].velocity_y = 0.0;
+            //entitys[index.index].velocity_y = 0;
+            entitys[index.index].jumping = false;
+            entitys[index.index].grounded = true;
         }
     }
 }
@@ -143,8 +156,8 @@ fn compare_levels_to_others_with_collision_direction() {
 }
 
 fn apply_gravity_and_friction(entity: &mut PhysicsComponent) {
-    entity.velocity_x *= entity.friction;
-    entity.velocity_y += entity.gravity;
+    entity.velocity_x *= entity.friction / 10;
+    entity.velocity_y += entity.gravity / 10;
 }
 
 fn check_collisions(
@@ -156,7 +169,8 @@ fn check_collisions(
     let collision_direction = get_collision_direction(physical_entitys, *index, *other_index);
     match entity_indexes[*index].entity_type {
         0 => compare_player_to_others_with_collision_direction(
-            physical_entitys, &entity_indexes[*index], 
+            physical_entitys, 
+            &entity_indexes[*index], 
             &entity_indexes[*other_index], 
             collision_direction),
         1 => compare_npcs_to_others_with_collision_direction(),
@@ -168,14 +182,18 @@ fn check_collisions(
 
 fn update(mut game_state: GameState) -> GameState {
     for index in 0..game_state.entity_indexes.len() {
+        // match game_state.entity_indexes[index].entity_type
+        if game_state.entity_indexes[index].entity_type == 0 {
+            update_player(&mut game_state.physical_entitys[index], &game_state.keys_pressed);
+            game_state.physical_entitys[index].grounded = false;
+        }
         apply_gravity_and_friction(&mut game_state.physical_entitys[index]);
         for other_index in 0..game_state.entity_indexes.len() {
-            if index == other_index { 
-                continue; 
+            if index != other_index { 
+                check_collisions(&mut game_state.physical_entitys, &game_state.entity_indexes, &index, &other_index);
             }
-            check_collisions(&mut game_state.physical_entitys, &game_state.entity_indexes, &index, &other_index);
         }
-        update_position(&mut game_state.physical_entitys[index]);
+        update_position(&mut game_state.physical_entitys[index], &game_state.entity_indexes[index]);
     }
 
     game_state
@@ -188,6 +206,7 @@ js_deserializable!( GameState );
 fn update_game_state(js_game_state: Reference) -> GameState {
     let js_game_state_deserialized = js!(
         let gameState = @{js_game_state};
+        //console.log("GAME STATE", gameState);
         return {
             physical_entitys: gameState.physical_entitys,
             entity_indexes: gameState.entity_indexes,

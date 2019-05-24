@@ -51,74 +51,79 @@ export const GameContainer = props => {
   };
 
   const [gameState, dispatchGameState] = useReducer(gameStateReducer, {
-    physical_components: [
+    physical_entitys: [
       {
-        position_x: 5.0,
-        position_y: 5.0,
-        velocity_x: 0.0,
-        velocity_y: 0.0,
-        max_speed: 5.0,
-        width: 5.0,
-        height: 5.0,
-        jumping: 0,
-        gravity: 0.3,
-        friction: 0.8
+        position_x: 200,
+        position_y: 5,
+        velocity_x: 0,
+        velocity_y: 1,
+        max_speed: 5,
+        width: 5,
+        height: 5,
+        jumping: false,
+        grounded: false,
+        gravity: 3,
+        friction: 8
       },
       {
-        position_x: 200.0,
-        position_y: 195.0,
-        velocity_x: 0.0,
-        velocity_y: 0.0,
-        max_speed: 5.0,
-        width: 5.0,
-        height: 30.0,
-        jumping: 0,
-        gravity: 0.3,
-        friction: 0.8
+        position_x: 200,
+        position_y: 195,
+        velocity_x: 0,
+        velocity_y: 0,
+        max_speed: 5,
+        width: 5,
+        height: 30,
+        jumping: false,
+        grounded: false,
+        gravity: 0,
+        friction: 8
       },
       {
-        position_x: 350.0,
-        position_y: 105.0,
-        velocity_x: 0.0,
-        velocity_y: 0.0,
-        max_speed: 5.0,
-        width: 15.0,
-        height: 15.0,
-        jumping: 0,
-        gravity: 0.3,
-        friction: 0.8
+        position_x: 350,
+        position_y: 105,
+        velocity_x: 0,
+        velocity_y: 0,
+        max_speed: 5,
+        width: 15,
+        height: 15,
+        jumping: false,
+        grounded: false,
+        gravity: 0,
+        friction: 8
       },
       {
-        position_x: 5.0,
-        position_y: 5.0,
-        velocity_x: 0.0,
-        velocity_y: 0.0,
-        max_speed: 5.0,
-        width: 30.0,
-        height: 5.0,
-        jumping: 0,
-        gravity: 0.3,
-        friction: 0.8
+        position_x: 50,
+        position_y: 50,
+        velocity_x: 0,
+        velocity_y: 0,
+        max_speed: 5,
+        width: 30,
+        height: 5,
+        jumping: false,
+        grounded: false,
+        gravity: 0,
+        friction: 8
       },
       {
-        position_x: 450.0,
-        position_y: 150.0,
-        velocity_x: 0.0,
-        velocity_y: 0.0,
-        max_speed: 5.0,
-        width: 400.0,
-        height: 30.0,
-        jumping: 0,
-        gravity: 0.3,
-        friction: 0.8
+        position_x: 190,
+        position_y: 150,
+        velocity_x: 0,
+        velocity_y: 0,
+        max_speed: 5,
+        width: 70,
+        height: 30,
+        jumping: false,
+        grounded: false,
+        gravity: 0,
+        friction: 8
       }
     ],
     entity_indexes: [
       //entity_type: 0 = player, 1 = npc, 2 = level
       { entity_type: 0, index: 0 },
-      { entity_type: 1, index: 1 },
-      { entity_type: 1, index: 2 },
-      { entity_type: 1, index: 3 },
+      { entity_type: 2, index: 1 },
+      { entity_type: 2, index: 2 },
+      { entity_type: 2, index: 3 },
       { entity_type: 2, index: 4 }
     ],
     keys_pressed: [],
@@ -127,8 +132,8 @@ export const GameContainer = props => {
 
   const drawCanvas = () => {
     const ctx = canvasRef.current.getContext("2d");
-    ctx.clearRect(0, 0, 500, 200);
-    gameState.physical_components.forEach(entity => {
+    ctx.clearRect(0, 0, 500, 400);
+    gameState.physical_entitys.forEach(entity => {
       ctx.fillRect(
         entity.position_x,
         entity.position_y,
@@ -142,7 +147,7 @@ export const GameContainer = props => {
   useOneFrame(() => dispatchGameState({ type: "updateGameState" }));
 
   return (
-    <canvas ref={canvasRef} width="500" height="200" className="gameCanvas" />
+    <canvas ref={canvasRef} width="500" height="400" className="gameCanvas" />
   );
 };
 
