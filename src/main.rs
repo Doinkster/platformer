@@ -87,13 +87,13 @@ fn update_npc() {
     
 }
 
-fn get_collision_direction(entity_a: &mut PhysicsComponent, entity_b: &mut PhysicsComponent) -> i32 {
+fn get_collision_direction(entitys: &mut Vec<PhysicsComponent>, index: &usize, other_index: &usize) -> i32 {
     //vector == actual distance between objects
-    let vector_x_component = (entity_a.position_x + (entity_a.width / 2.0)) - (entity_b.position_x + (entity_b.width / 2.0));
-    let vector_y_component = (entity_a.position_y + (entity_a.width / 2.0)) - (entity_b.position_y + (entity_b.width / 2.0));
+    let vector_x_component = (entitys[*index].position_x + (entitys[*index].width / 2.0)) - (entitys[*other_index].position_x + (entitys[*other_index].width / 2.0));
+    let vector_y_component = (entitys[*index].position_y + (entitys[*index].width / 2.0)) - (entitys[*other_index].position_y + (entitys[*other_index].width / 2.0));
     //half widths == minimum distance needed between objects before collision
-    let half_widths_added = (entity_a.width / 2.0) + (entity_b.width / 2.0);
-    let half_heights_added = (entity_a.height / 2.0) + (entity_b.height / 2.0);
+    let half_widths_added = (entitys[*index].width / 2.0) + (entitys[*other_index].width / 2.0);
+    let half_heights_added = (entitys[*index].height / 2.0) + (entitys[*other_index].height / 2.0);
     let mut collision_direction = -1;
 
     //if collision
@@ -105,18 +105,18 @@ fn get_collision_direction(entity_a: &mut PhysicsComponent, entity_b: &mut Physi
         if x_magnitude >= y_magnitude {
             if y_magnitude > 0.0 {
                 collision_direction = 1;
-                entity_a.position_y += y_magnitude;
+                entitys[*index].position_y += y_magnitude;
             } else {
                 collision_direction = 3;
-                entity_a.position_y -= y_magnitude;
+                entitys[*index].position_y -= y_magnitude;
             }
         } else {
             if x_magnitude > 0.0 {
                 collision_direction = 0;
-                entity_a.position_x += x_magnitude;
+                entitys[*index].position_x += x_magnitude;
             } else {
                 collision_direction = 2;
-                entity_a.position_x -= x_magnitude;
+                entitys[*index].position_x -= x_magnitude;
             }
         }
     }
@@ -124,7 +124,7 @@ fn get_collision_direction(entity_a: &mut PhysicsComponent, entity_b: &mut Physi
     collision_direction
 }
 
-fn compare_player_to_others_with_collision_direction(entity_a: &mut PhysicsComponent, entity_b_index: &EntityIndex, direction: i32) {
+fn compare_player_to_others_with_collision_direction(entity_a: &mut PhysicsComponent, mut entity_b_index: &EntityIndex, direction: i32) {
     //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
     if entity_b_index.entity_type == 2 {
         if direction == 0 || direction == 2 {
@@ -153,35 +153,42 @@ fn apply_gravity_and_friction(entity: &mut PhysicsComponent) {
     entity.velocity_y += entity.gravity;
 }
 
-fn check_collisions(entity: &mut PhysicsComponent, entity_index: &EntityIndex, entitys: &mut Vec<PhysicsComponent>, indexes: &Vec <EntityIndex>) {
-    //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
-    for other_entity_index in indexes {
-        if entity_index.index != other_entity_index.index {
-            let other_entity = &mut entitys[other_entity_index.index];
-            let collision_direction = get_collision_direction(entity, other_entity);
-            match entity_index.entity_type {
-                0 => compare_player_to_others_with_collision_direction(entity, other_entity_index, collision_direction),
+// fn check_collisions(entity: &mut PhysicsComponent, other_entity: &mut PhysicsComponent, entity_index: &EntityIndex, other_entity_index: &EntityIndex) {
+//     //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
+//     //for other_entity_index in 0..entitys.len() {
+//         //if entity_index.index != other_entity_index {
+//             //let other_entity = &mut entitys[other_entity_index];
+//             let collision_direction = get_collision_direction(entity, other_entity);
+//             match entity_index.entity_type {
+//                 0 => compare_player_to_others_with_collision_direction(entity, other_entity_index, collision_direction),
+//                 1 => compare_npcs_to_others_with_collision_direction(),
+//                 2 => compare_levels_to_others_with_collision_direction(),
+//                 _ => panic!()
+//             }
+//     //     } else {
+//     //         continue;
+//     //     }
+//     // };
+// }
+
+fn update(mut game_state: GameState) -> GameState {
+    for index in 0..game_state.entity_indexes.len() {
+        apply_gravity_and_friction(&mut game_state.physical_entitys[index]);
+        for other_index in 0..game_state.entity_indexes.len() {
+            if index == other_index { 
+                continue; 
+            }
+            //check_collisions(entity, other_entity, entity_index, other_entity_index);
+            let collision_direction = get_collision_direction(&mut game_state.physical_entitys, &index, &other_index);
+            match game_state.entity_indexes[index].entity_type {
+                0 => compare_player_to_others_with_collision_direction(&mut game_state.physical_entitys[index], &game_state.entity_indexes[other_index], collision_direction),
                 1 => compare_npcs_to_others_with_collision_direction(),
                 2 => compare_levels_to_others_with_collision_direction(),
                 _ => panic!()
             }
         }
-    };
-}
+    }
 
-fn update(mut game_state: GameState) -> GameState {
-    for entity_index in &mut game_state.entity_indexes {
-        //let entity = &mut game_state.physical_entitys[entity_index.index];
-        apply_gravity_and_friction(&entity_index);
-        check_collisions(entity, &entity_index, &mut game_state.physical_entitys, &game_state.entity_indexes);
-        match entity_index.entity_type {
-            0 => update_player(entity, &game_state.keys_pressed),
-            1 => update_npc(),
-            2 => update_npc(),
-            _ => panic!()
-        }
-        update_position(entity);
-    };
     game_state
 }
 
