@@ -2,8 +2,6 @@ import React, { useState, useEffect, useReducer, useRef } from "react";
 import useOneFrame from "./useOneFrame";
 
 export const GameContainer = props => {
-  //const [keys, setKeys] = useState([]);
-  //const [positions, setPositions] = useState([[5, 5], [200, 195], [350, 100]]);
   const keyCodes = useRef([32, 65, 68, 87]);
   const canvasRef = useRef(null);
 
@@ -149,5 +147,6 @@ export const GameContainer = props => {
 };
 
 // http://www.somethinghitme.com/2013/01/09/creating-a-canvas-platformer-tutorial-part-one/
+// http://www.somethinghitme.com/2013/04/16/creating-a-canvas-platformer-tutorial-part-tw/
 // https://medium.com/@lavrton/using-react-with-html5-canvas-871d07d8d753
 // https://codesandbox.io/s/ojxl32jm4z

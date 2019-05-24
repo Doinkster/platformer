@@ -1,6 +1,3 @@
-// #![allow(unused_variables)]
-// #![allow(dead_code)]
-
 use stdweb;
 use stdweb::js_serializable;
 use stdweb::js_deserializable;
@@ -45,58 +42,72 @@ struct EntityIndexes {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct GameState {
-    physical_components: Vec<PhysicsComponent>,
+    physical_entitys: Vec<PhysicsComponent>,
     entity_indexes: Vec<EntityIndexes>,
     keys_pressed: Vec<i32>
 }
 
-fn all_entities_update(component: &mut PhysicsComponent) {
-    component.velocity_x *= component.friction;
-    component.velocity_y += component.gravity;
-    component.position_x += component.velocity_x;
-    component.position_y += component.velocity_y;
+fn update_position(entity: &mut PhysicsComponent) {
+    entity.velocity_x *= entity.friction;
+    entity.velocity_y += entity.gravity;
+    entity.position_x += entity.velocity_x;
+    entity.position_y += entity.velocity_y;
     
-    if component.position_x >= 500.0 {
-        component.position_x = 500.0 - component.width as f32;
-    } else if component.position_x <= 0.0 {
-        component.position_x = 0.0;
+    if entity.position_x >= 500.0 {
+        entity.position_x = 500.0 - entity.width as f32;
+    } else if entity.position_x <= 0.0 {
+        entity.position_x = 0.0;
     }
 
-    if component.position_y >= 150.0 - component.height as f32 {
-        component.position_y = 150.0 - component.height as f32;
-        component.jumping = 0;
+    if entity.position_y >= 150.0 - entity.height as f32 {
+        entity.position_y = 150.0 - entity.height as f32;
+        entity.jumping = 0;
     }
 }
 
-fn update_player(player_component: &mut PhysicsComponent, keys_pressed: &Vec<i32>) {
+fn update_player(game_state: &mut GameState, index: usize) {
+    check_collisions(&mut game_state.physical_entitys, &game_state.entity_indexes);
     //keys = [32 = space, 65 = a, 68 = d, 87 = w]
+    let player_entity = game_state.physical_entitys[index];
+    let keys_pressed = game_state.keys_pressed;
     if keys_pressed.contains(&32) || keys_pressed.contains(&87) {
-        if player_component.jumping == 0 {
-            player_component.jumping = 1;
-            player_component.velocity_y = -player_component.max_speed * 2.0;
+        if player_entity.jumping == 0 {
+            player_entity.jumping = 1;
+            player_entity.velocity_y = -player_entity.max_speed * 2.0;
         }
     }
     if keys_pressed.contains(&68) {
-        if player_component.velocity_x < player_component.max_speed {
-            player_component.velocity_x += 0.5;
+        if player_entity.velocity_x < player_entity.max_speed {
+            player_entity.velocity_x += 0.5;
         }
     } 
     if keys_pressed.contains(&65) {
-        if player_component.velocity_x > -player_component.max_speed {
-            player_component.velocity_x -= 0.5;
+        if player_entity.velocity_x > -player_entity.max_speed {
+            player_entity.velocity_x -= 0.5;
         }
     }
-    all_entities_update(player_component);
+    update_position(player_entity);
 }
 
 fn update_npc() {
     
 }
 
+fn check_collisions(entitys: &mut Vec<PhysicsComponent>, indexes: &Vec <EntityIndexes>) {
+    for entity in indexes {
+        if entity.entity_type == 0 {
+            
+        }
+    }
+}
+
 fn update(mut game_state: GameState) -> GameState {
-    for entity in &game_state.entity_indexes {
+    //check_collisions(&mut game_state.physical_entitys, &game_state.entity_indexes);
+    //works without mut?
+    for entity in &mut game_state.entity_indexes {
         match entity.entity_type {
-            0 => update_player(&mut game_state.physical_components[entity.index], &game_state.keys_pressed),
+            //0 => update_player(&mut game_state.physical_entitys[entity.index], &game_state.keys_pressed),
+            0 => update_player(&mut game_state, entity.index),
             1 => update_npc(),
             2 => update_npc(),
             _ => panic!()
@@ -113,7 +124,7 @@ fn update_game_state(js_game_state: Reference) -> GameState {
     let js_game_state_deserialized = js!(
         let gameState = @{js_game_state};
         return {
-            physical_components: gameState.physical_components,
+            physical_entitys: gameState.physical_entitys,
             entity_indexes: gameState.entity_indexes,
             keys_pressed: gameState.keys_pressed,
         };
@@ -129,6 +140,7 @@ fn main() {
 }
 
 //https://crates.io/crates/serde
-//https://github.com/jakesgordon/javascript-tiny-platformer/blob/master/platformer.js
+//http://www.somethinghitme.com/2013/01/09/creating-a-canvas-platformer-tutorial-part-one/
+//http://www.somethinghitme.com/2013/04/16/creating-a-canvas-platformer-tutorial-part-tw/
 //webpack mjs
 //https://kyren.github.io/2018/09/14/rustconf-talk.html
