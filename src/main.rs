@@ -51,16 +51,16 @@ fn update_position(entity: &mut PhysicsComponent) {
     entity.position_x += entity.velocity_x;
     entity.position_y += entity.velocity_y;
     
-    if entity.position_x >= 500.0 {
-        entity.position_x = 500.0 - entity.width as f32;
-    } else if entity.position_x <= 0.0 {
-        entity.position_x = 0.0;
-    }
+    // if entity.position_x >= 500.0 {
+    //     entity.position_x = 500.0 - entity.width as f32;
+    // } else if entity.position_x <= 0.0 {
+    //     entity.position_x = 0.0;
+    // }
 
-    if entity.position_y >= 150.0 - entity.height as f32 {
-        entity.position_y = 150.0 - entity.height as f32;
-        entity.jumping = 0;
-    }
+    // if entity.position_y >= 150.0 - entity.height as f32 {
+    //     entity.position_y = 150.0 - entity.height as f32;
+    //     entity.jumping = 0;
+    // }
 }
 
 fn update_player(player_entity: &mut PhysicsComponent, keys_pressed: &Vec<i32>) {
@@ -124,19 +124,27 @@ fn get_collision_direction(entity_a: &mut PhysicsComponent, entity_b: &mut Physi
     collision_direction
 }
 
-fn compare_player_to_others(entity_a: &mut PhysicsComponent, entity_b: &mut PhysicsComponent, entity_b_type: i32, direction: i32) {
+fn compare_player_to_others_with_collision_direction(entity_a: &mut PhysicsComponent, entity_b_index: &EntityIndex, direction: i32) {
     //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
-    if entity_b_type == 2 {
-        if direction == 
-
+    if entity_b_index.entity_type == 2 {
+        if direction == 0 || direction == 2 {
+            entity_a.velocity_x = 0.0;
+            //entity_a.jumping = 0;
+        }
+        if direction == 1 {
+            entity_a.velocity_y = -1.0;
+        }
+        if direction == 3 {
+            entity_a.velocity_y = 0.0;
+        }
     }
 }
 
-fn compare_npcs_to_others() {
+fn compare_npcs_to_others_with_collision_direction() {
 
 }
 
-fn compare_levels_to_others() {
+fn compare_levels_to_others_with_collision_direction() {
 
 }
 
@@ -152,9 +160,9 @@ fn check_collisions(entity: &mut PhysicsComponent, entity_index: &mut EntityInde
             let other_entity = &mut entitys[other_entity_index.index];
             let collision_direction = get_collision_direction(entity, other_entity);
             match entity_index.entity_type {
-                0 => compare_player_to_others(entity, other_entity, other_entity_index.entity_type, collision_direction),
-                1 => compare_npcs_to_others(),
-                2 => compare_levels_to_others(),
+                0 => compare_player_to_others_with_collision_direction(entity, other_entity_index, collision_direction),
+                1 => compare_npcs_to_others_with_collision_direction(),
+                2 => compare_levels_to_others_with_collision_direction(),
                 _ => panic!()
             }
         }
