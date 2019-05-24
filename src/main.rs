@@ -50,17 +50,6 @@ struct GameState {
 fn update_position(entity: &mut PhysicsComponent) {
     entity.position_x += entity.velocity_x;
     entity.position_y += entity.velocity_y;
-    
-    // if entity.position_x >= 500.0 {
-    //     entity.position_x = 500.0 - entity.width as f32;
-    // } else if entity.position_x <= 0.0 {
-    //     entity.position_x = 0.0;
-    // }
-
-    // if entity.position_y >= 150.0 - entity.height as f32 {
-    //     entity.position_y = 150.0 - entity.height as f32;
-    //     entity.jumping = 0;
-    // }
 }
 
 fn update_player(player_entity: &mut PhysicsComponent, keys_pressed: &Vec<i32>) {
@@ -87,13 +76,13 @@ fn update_npc() {
     
 }
 
-fn get_collision_direction(entitys: &mut Vec<PhysicsComponent>, index: &usize, other_index: &usize) -> i32 {
+fn get_collision_direction(entitys: &mut Vec<PhysicsComponent>, index: usize, other_index: usize) -> i32 {
     //vector == actual distance between objects
-    let vector_x_component = (entitys[*index].position_x + (entitys[*index].width / 2.0)) - (entitys[*other_index].position_x + (entitys[*other_index].width / 2.0));
-    let vector_y_component = (entitys[*index].position_y + (entitys[*index].width / 2.0)) - (entitys[*other_index].position_y + (entitys[*other_index].width / 2.0));
+    let vector_x_component = (entitys[index].position_x + (entitys[index].width / 2.0)) - (entitys[other_index].position_x + (entitys[other_index].width / 2.0));
+    let vector_y_component = (entitys[index].position_y + (entitys[index].width / 2.0)) - (entitys[other_index].position_y + (entitys[other_index].width / 2.0));
     //half widths == minimum distance needed between objects before collision
-    let half_widths_added = (entitys[*index].width / 2.0) + (entitys[*other_index].width / 2.0);
-    let half_heights_added = (entitys[*index].height / 2.0) + (entitys[*other_index].height / 2.0);
+    let half_widths_added = (entitys[index].width / 2.0) + (entitys[other_index].width / 2.0);
+    let half_heights_added = (entitys[index].height / 2.0) + (entitys[other_index].height / 2.0);
     let mut collision_direction = -1;
 
     //if collision
@@ -105,18 +94,18 @@ fn get_collision_direction(entitys: &mut Vec<PhysicsComponent>, index: &usize, o
         if x_magnitude >= y_magnitude {
             if y_magnitude > 0.0 {
                 collision_direction = 1;
-                entitys[*index].position_y += y_magnitude;
+                entitys[index].position_y += y_magnitude;
             } else {
                 collision_direction = 3;
-                entitys[*index].position_y -= y_magnitude;
+                entitys[index].position_y -= y_magnitude;
             }
         } else {
             if x_magnitude > 0.0 {
                 collision_direction = 0;
-                entitys[*index].position_x += x_magnitude;
+                entitys[index].position_x += x_magnitude;
             } else {
                 collision_direction = 2;
-                entitys[*index].position_x -= x_magnitude;
+                entitys[index].position_x -= x_magnitude;
             }
         }
     }
@@ -124,18 +113,23 @@ fn get_collision_direction(entitys: &mut Vec<PhysicsComponent>, index: &usize, o
     collision_direction
 }
 
-fn compare_player_to_others_with_collision_direction(entity_a: &mut PhysicsComponent, mut entity_b_index: &EntityIndex, direction: i32) {
+fn compare_player_to_others_with_collision_direction(
+    entitys: &mut Vec<PhysicsComponent>, 
+    index: &EntityIndex, 
+    other_index: &EntityIndex, 
+    direction: i32) 
+{
     //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
-    if entity_b_index.entity_type == 2 {
+    if other_index.entity_type == 2 {
         if direction == 0 || direction == 2 {
-            entity_a.velocity_x = 0.0;
+            entitys[index.index].velocity_x = 0.0;
             //entity_a.jumping = 0;
         }
         if direction == 1 {
-            entity_a.velocity_y = -1.0;
+            entitys[index.index].velocity_y = -1.0;
         }
         if direction == 3 {
-            entity_a.velocity_y = 0.0;
+            entitys[index.index].velocity_y = 0.0;
         }
     }
 }
@@ -153,23 +147,24 @@ fn apply_gravity_and_friction(entity: &mut PhysicsComponent) {
     entity.velocity_y += entity.gravity;
 }
 
-// fn check_collisions(entity: &mut PhysicsComponent, other_entity: &mut PhysicsComponent, entity_index: &EntityIndex, other_entity_index: &EntityIndex) {
-//     //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
-//     //for other_entity_index in 0..entitys.len() {
-//         //if entity_index.index != other_entity_index {
-//             //let other_entity = &mut entitys[other_entity_index];
-//             let collision_direction = get_collision_direction(entity, other_entity);
-//             match entity_index.entity_type {
-//                 0 => compare_player_to_others_with_collision_direction(entity, other_entity_index, collision_direction),
-//                 1 => compare_npcs_to_others_with_collision_direction(),
-//                 2 => compare_levels_to_others_with_collision_direction(),
-//                 _ => panic!()
-//             }
-//     //     } else {
-//     //         continue;
-//     //     }
-//     // };
-// }
+fn check_collisions(
+    physical_entitys: &mut Vec<PhysicsComponent>, 
+    entity_indexes: &Vec<EntityIndex>, 
+    index: &usize, 
+    other_index: &usize) 
+{
+    let collision_direction = get_collision_direction(physical_entitys, *index, *other_index);
+    match entity_indexes[*index].entity_type {
+        0 => compare_player_to_others_with_collision_direction(
+            physical_entitys, &entity_indexes[*index], 
+            &entity_indexes[*other_index], 
+            collision_direction),
+        1 => compare_npcs_to_others_with_collision_direction(),
+        2 => compare_levels_to_others_with_collision_direction(),
+        _ => panic!()
+    }
+    
+}
 
 fn update(mut game_state: GameState) -> GameState {
     for index in 0..game_state.entity_indexes.len() {
@@ -178,15 +173,9 @@ fn update(mut game_state: GameState) -> GameState {
             if index == other_index { 
                 continue; 
             }
-            //check_collisions(entity, other_entity, entity_index, other_entity_index);
-            let collision_direction = get_collision_direction(&mut game_state.physical_entitys, &index, &other_index);
-            match game_state.entity_indexes[index].entity_type {
-                0 => compare_player_to_others_with_collision_direction(&mut game_state.physical_entitys[index], &game_state.entity_indexes[other_index], collision_direction),
-                1 => compare_npcs_to_others_with_collision_direction(),
-                2 => compare_levels_to_others_with_collision_direction(),
-                _ => panic!()
-            }
+            check_collisions(&mut game_state.physical_entitys, &game_state.entity_indexes, &index, &other_index);
         }
+        update_position(&mut game_state.physical_entitys[index]);
     }
 
     game_state
