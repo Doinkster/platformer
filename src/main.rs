@@ -27,15 +27,15 @@ struct PhysicsComponent {
     velocity_x: f32,
     velocity_y: f32,
     max_speed: f32,
-    width: i32,
-    height: i32,
+    width: f32,
+    height: f32,
     jumping: i32,
     gravity: f32,
     friction: f32
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct EntityIndexes {
+struct EntityIndex {
     entity_type: i32,
     index: usize
 }
@@ -43,13 +43,11 @@ struct EntityIndexes {
 #[derive(Serialize, Deserialize, Debug)]
 struct GameState {
     physical_entitys: Vec<PhysicsComponent>,
-    entity_indexes: Vec<EntityIndexes>,
+    entity_indexes: Vec<EntityIndex>,
     keys_pressed: Vec<i32>
 }
 
 fn update_position(entity: &mut PhysicsComponent) {
-    entity.velocity_x *= entity.friction;
-    entity.velocity_y += entity.gravity;
     entity.position_x += entity.velocity_x;
     entity.position_y += entity.velocity_y;
     
@@ -83,15 +81,25 @@ fn update_player(player_entity: &mut PhysicsComponent, keys_pressed: &Vec<i32>) 
             player_entity.velocity_x -= 0.5;
         }
     }
-    update_position(player_entity);
 }
 
 fn update_npc() {
     
 }
 
-fn compare_player_to_others(entity_a: &mut PhysicsComponent, entity_b: &mut PhysicsComponent) {
+fn get_collision_direction() {
+    let vector_x = (entity_a.position_x + (entity_a.width / 2.0)) - (entity_b.position_x + (entity_b.width / 2.0));
+    let vector_y = (entity_a.position_y + (entity_a.width / 2.0)) - (entity_b.position_y + (entity_b.width / 2.0));
+    let half_widths_added = (entity_a.width / 2.0) + (entity_b.width / 2.0);
+    let half_heights_added = (entity_a.height / 2.0) + (entity_b.height / 2.0);
+    let collision_direction = -1;
+}
 
+fn compare_player_to_others(entity_a: &mut PhysicsComponent, entity_b: &mut PhysicsComponent, entity_b_type: i32) {
+    if entity_b_type == 1 || entity_b_type == 2 {
+        
+
+    }
 }
 
 fn compare_npcs_to_others() {
@@ -102,13 +110,19 @@ fn compare_levels_to_others() {
 
 }
 
-fn check_collisions(entity: &mut EntityIndexes, entitys: &mut Vec<PhysicsComponent>, indexes: &Vec <EntityIndexes>) {
-    let entity_physical_components = &mut entitys[entity.index];
-    for other_entitys in indexes {
-        if entity.index != other_entitys.index {
-            let entity_to_compare_physical_components = &mut entitys[other_entitys.index];
-            match entity.entity_type {
-                0 => compare_player_to_others(entity_physical_components, entity_to_compare_physical_components),
+fn apply_gravity_and_friction(entity: &mut PhysicsComponent) {
+    entity.velocity_x *= entity.friction;
+    entity.velocity_y += entity.gravity;
+}
+
+fn check_collisions(entity: &mut PhysicsComponent, entity_index: &mut EntityIndex, entitys: &mut Vec<PhysicsComponent>, indexes: &Vec <EntityIndex>) {
+    //direction -> 0 = left, 1 = top, 2 = right, 3 = bottom
+    for other_entity_index in indexes {
+        if entity_index.index != other_entity_index.index {
+            let other_entity = &mut entitys[other_entity_index.index];
+            let collision_direction = get_collision_direction(entity, other_entity);
+            match entity_index.entity_type {
+                0 => compare_player_to_others(entity, other_entity, other_entity_index.entity_type),
                 1 => compare_npcs_to_others(),
                 2 => compare_levels_to_others(),
                 _ => panic!()
@@ -118,17 +132,18 @@ fn check_collisions(entity: &mut EntityIndexes, entitys: &mut Vec<PhysicsCompone
 }
 
 fn update(mut game_state: GameState) -> GameState {
-    //check_collisions(&mut game_state.physical_entitys, &game_state.entity_indexes);
-    //works without mut?
-    for entity in &mut game_state.entity_indexes {
-        check_collisions(&mut entity, &mut game_state.physical_entitys, &game_state.entity_indexes);
-        match entity.entity_type {
-            0 => update_player(&mut game_state.physical_entitys[entity.index], &game_state.keys_pressed),
-            //0 => update_player(&mut game_state, entity.index),
+    //works without mut? V
+    for entity_index in &mut game_state.entity_indexes {
+        let entity = &mut game_state.physical_entitys[entity_index.index];
+        apply_gravity_and_friction(entity);
+        check_collisions(entity, &mut entity_index, &mut game_state.physical_entitys, &game_state.entity_indexes);
+        match entity_index.entity_type {
+            0 => update_player(entity, &game_state.keys_pressed),
             1 => update_npc(),
             2 => update_npc(),
             _ => panic!()
         }
+        update_position(entity);
     };
     game_state
 }
