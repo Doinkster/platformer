@@ -87,17 +87,47 @@ fn update_npc() {
     
 }
 
-fn get_collision_direction() {
-    let vector_x = (entity_a.position_x + (entity_a.width / 2.0)) - (entity_b.position_x + (entity_b.width / 2.0));
-    let vector_y = (entity_a.position_y + (entity_a.width / 2.0)) - (entity_b.position_y + (entity_b.width / 2.0));
+fn get_collision_direction(entity_a: &mut PhysicsComponent, entity_b: &mut PhysicsComponent) -> i32 {
+    //vector == actual distance between objects
+    let vector_x_component = (entity_a.position_x + (entity_a.width / 2.0)) - (entity_b.position_x + (entity_b.width / 2.0));
+    let vector_y_component = (entity_a.position_y + (entity_a.width / 2.0)) - (entity_b.position_y + (entity_b.width / 2.0));
+    //half widths == minimum distance needed between objects before collision
     let half_widths_added = (entity_a.width / 2.0) + (entity_b.width / 2.0);
     let half_heights_added = (entity_a.height / 2.0) + (entity_b.height / 2.0);
     let collision_direction = -1;
+
+    //if collision
+    if vector_x_component.abs() < half_widths_added && vector_y_component.abs() < half_heights_added {
+        let x_magnitude = half_widths_added - vector_x_component.abs();
+        let y_magnitude = half_heights_added - vector_y_component.abs();
+
+        //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
+        if x_magnitude >= y_magnitude {
+            if y_magnitude > 0.0 {
+                collision_direction = 1;
+                entity_a.position_y += y_magnitude;
+            } else {
+                collision_direction = 3;
+                entity_a.position_y -= y_magnitude;
+            }
+        } else {
+            if x_magnitude > 0.0 {
+                collision_direction = 0;
+                entity_a.position_x += x_magnitude;
+            } else {
+                collision_direction = 2;
+                entity_a.position_x -= x_magnitude;
+            }
+        }
+    }
+
+    collision_direction
 }
 
-fn compare_player_to_others(entity_a: &mut PhysicsComponent, entity_b: &mut PhysicsComponent, entity_b_type: i32) {
-    if entity_b_type == 1 || entity_b_type == 2 {
-        
+fn compare_player_to_others(entity_a: &mut PhysicsComponent, entity_b: &mut PhysicsComponent, entity_b_type: i32, direction: i32) {
+    //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
+    if entity_b_type == 2 {
+        if direction == 
 
     }
 }
@@ -116,13 +146,13 @@ fn apply_gravity_and_friction(entity: &mut PhysicsComponent) {
 }
 
 fn check_collisions(entity: &mut PhysicsComponent, entity_index: &mut EntityIndex, entitys: &mut Vec<PhysicsComponent>, indexes: &Vec <EntityIndex>) {
-    //direction -> 0 = left, 1 = top, 2 = right, 3 = bottom
+    //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
     for other_entity_index in indexes {
         if entity_index.index != other_entity_index.index {
             let other_entity = &mut entitys[other_entity_index.index];
             let collision_direction = get_collision_direction(entity, other_entity);
             match entity_index.entity_type {
-                0 => compare_player_to_others(entity, other_entity, other_entity_index.entity_type),
+                0 => compare_player_to_others(entity, other_entity, other_entity_index.entity_type, collision_direction),
                 1 => compare_npcs_to_others(),
                 2 => compare_levels_to_others(),
                 _ => panic!()
