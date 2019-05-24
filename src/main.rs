@@ -65,11 +65,8 @@ fn update_position(entity: &mut PhysicsComponent) {
     }
 }
 
-fn update_player(game_state: &mut GameState, index: usize) {
-    check_collisions(&mut game_state.physical_entitys, &game_state.entity_indexes);
+fn update_player(player_entity: &mut PhysicsComponent, keys_pressed: &Vec<i32>) {
     //keys = [32 = space, 65 = a, 68 = d, 87 = w]
-    let player_entity = game_state.physical_entitys[index];
-    let keys_pressed = game_state.keys_pressed;
     if keys_pressed.contains(&32) || keys_pressed.contains(&87) {
         if player_entity.jumping == 0 {
             player_entity.jumping = 1;
@@ -93,21 +90,41 @@ fn update_npc() {
     
 }
 
-fn check_collisions(entitys: &mut Vec<PhysicsComponent>, indexes: &Vec <EntityIndexes>) {
-    for entity in indexes {
-        if entity.entity_type == 0 {
-            
+fn compare_player_to_others(entity_a: &mut PhysicsComponent, entity_b: &mut PhysicsComponent) {
+
+}
+
+fn compare_npcs_to_others() {
+
+}
+
+fn compare_levels_to_others() {
+
+}
+
+fn check_collisions(entity: &mut EntityIndexes, entitys: &mut Vec<PhysicsComponent>, indexes: &Vec <EntityIndexes>) {
+    let entity_physical_components = &mut entitys[entity.index];
+    for other_entitys in indexes {
+        if entity.index != other_entitys.index {
+            let entity_to_compare_physical_components = &mut entitys[other_entitys.index];
+            match entity.entity_type {
+                0 => compare_player_to_others(entity_physical_components, entity_to_compare_physical_components),
+                1 => compare_npcs_to_others(),
+                2 => compare_levels_to_others(),
+                _ => panic!()
+            }
         }
-    }
+    };
 }
 
 fn update(mut game_state: GameState) -> GameState {
     //check_collisions(&mut game_state.physical_entitys, &game_state.entity_indexes);
     //works without mut?
     for entity in &mut game_state.entity_indexes {
+        check_collisions(&mut entity, &mut game_state.physical_entitys, &game_state.entity_indexes);
         match entity.entity_type {
-            //0 => update_player(&mut game_state.physical_entitys[entity.index], &game_state.keys_pressed),
-            0 => update_player(&mut game_state, entity.index),
+            0 => update_player(&mut game_state.physical_entitys[entity.index], &game_state.keys_pressed),
+            //0 => update_player(&mut game_state, entity.index),
             1 => update_npc(),
             2 => update_npc(),
             _ => panic!()
