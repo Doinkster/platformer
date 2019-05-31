@@ -12,3 +12,5 @@ To compile rust code changes:
 3. Comment out lines 20 thru 26
 4. npm run server
 ```
+
+Work in progress :)
