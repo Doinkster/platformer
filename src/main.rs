@@ -5,19 +5,17 @@ use stdweb::__js_serializable_boilerplate;
 use stdweb::__js_serializable_serde_boilerplate;
 use stdweb::__js_deserializable_serde_boilerplate;
 use stdweb_internal_macros;
-#[allow(unused_imports)] use stdweb_internal_runtime;
 use stdweb_internal_macros::js_export;
 use stdweb::js;
 use stdweb::_js_impl;
 use stdweb::__js_raw_asm;
 use stdweb::{Reference};
 use stdweb::unstable::TryInto;
-
-#[allow(unused_imports)] use stdweb::console;
-#[allow(unused_imports)] use stdweb::__internal_console_unsafe;
-
 use serde::{Serialize, Deserialize};
 use serde_json;
+#[allow(unused_imports)] use stdweb_internal_runtime;
+#[allow(unused_imports)] use stdweb::console;
+#[allow(unused_imports)] use stdweb::__internal_console_unsafe;
 #[allow(unused_imports)] use serde_json::{Value};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -49,9 +47,6 @@ struct GameState {
 }
 
 fn update_position(entity: &mut PhysicsComponent, entity_index: &EntityIndex) {
-    //console!(log, "index", entity_index.index as f32);
-    //console!(log, "type", entity_index.entity_type as f32);
-    console!(log, "grounded", entity.grounded);
     if entity_index.entity_type == 0 && entity.grounded == true {
         entity.velocity_y = 0;
     }
@@ -80,10 +75,6 @@ fn update_player(player_entity: &mut PhysicsComponent, keys_pressed: &Vec<i32>) 
     }
 }
 
-// fn update_npc() {
-    
-// }
-
 fn get_collision_direction(entitys: &mut Vec<PhysicsComponent>, index: usize, other_index: usize) -> i32 {
     //vector == actual distance between objects
     let vector_x = (entitys[index].position_x + (entitys[index].width / 2)) - 
@@ -98,25 +89,25 @@ fn get_collision_direction(entitys: &mut Vec<PhysicsComponent>, index: usize, ot
 
     //if collision
     if vector_x.abs() < half_widths_added && vector_y.abs() < half_heights_added {
-        let x_magnitude = half_widths_added - vector_x.abs();
-        let y_magnitude = half_heights_added - vector_y.abs();
+        let x_offset = half_widths_added - vector_x.abs();
+        let y_offset = half_heights_added - vector_y.abs();
 
         //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
-        if x_magnitude >= y_magnitude {
+        if x_offset >= y_offset {
             if vector_y > 0 {
                 collision_direction = 1;
-                entitys[index].position_y += y_magnitude;
+                entitys[index].position_y += y_offset;
             } else {
                 collision_direction = 3;
-                entitys[index].position_y -= y_magnitude;
+                entitys[index].position_y -= y_offset;
             }
         } else {
             if vector_x > 0 {
                 collision_direction = 0;
-                entitys[index].position_x += x_magnitude;
+                entitys[index].position_x += x_offset;
             } else {
                 collision_direction = 2;
-                entitys[index].position_x -= x_magnitude;
+                entitys[index].position_x -= x_offset;
             }
         }
     }
@@ -130,7 +121,6 @@ fn compare_player_to_others_with_collision_direction(
     direction: i32) 
 {
     //collision_direction -> 0=left, 1=top, 2=right, 3=bottom
-    //console!(log, "HERE", index.index as f32);
     if other_index.entity_type == 2 {
         if direction == 0 || direction == 2 {
             entitys[index.index].velocity_x = 0;
@@ -206,7 +196,6 @@ js_deserializable!( GameState );
 fn update_game_state(js_game_state: Reference) -> GameState {
     let js_game_state_deserialized = js!(
         let gameState = @{js_game_state};
-        //console.log("GAME STATE", gameState);
         return {
             physical_entitys: gameState.physical_entitys,
             entity_indexes: gameState.entity_indexes,

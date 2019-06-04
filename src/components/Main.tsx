@@ -2,12 +2,12 @@ import React, { useEffect } from "react";
 import rustFuncs from "../../target/wasm32-unknown-unknown/debug/scroller.js";
 import { GameContainer } from "./index";
 
-export const Main = props => {
+export const Main = () => {
   const [rustFuncsObject, setRustFuncsObject] = React.useState(0);
 
   const setRustFunctions = async () => {
-    const rustFuncsObject = await rustFuncs;
-    setRustFuncsObject(() => rustFuncsObject);
+    const funcs = await rustFuncs;
+    setRustFuncsObject(() => funcs);
   };
 
   useEffect(() => {
